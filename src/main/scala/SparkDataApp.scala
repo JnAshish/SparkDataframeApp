@@ -24,7 +24,7 @@ object SparkDataApp {
       .getOrCreate()
     //spark.sparkContext.setLogLevel("ERROR")
 
-    try {
+    //try {
       val processingTime = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss").format(LocalDateTime.now)
       val log1 = ("InProcessing", processingTime)
       LogList = log1.toString().replace("(", "").replace(")", "") :: LogList
@@ -39,6 +39,7 @@ object SparkDataApp {
       val SRC_FILE_SCHEMA_NM = job_properties("SRC_FILE_SCHEMA_NM")
       val tbl_id = job_properties("tbl_id")
       val TBL_NAME = job_properties("TBL_NAME")
+      val Hive_Path=job_properties("HIVE_PATH")
 
       //val datapath=("file://"+properties.get("SRC_FILE_PATH")+"/"+properties.get("SRC_FILE_NM"))
       val datapath = (SRC_FILE_PATH + "/" + SRC_FILE_NM)
@@ -95,7 +96,9 @@ object SparkDataApp {
 
       val tblname = TBL_NAME
       spark.sql("drop table if exists " + tblname)
-      val input5 = "create table if not exists " + tblname + "(" + input4.collect().toList.mkString(",") + ") stored as parquetfile"
+      val input5 = "create external table if not exists " + tblname + "(" + input4.collect().toList.mkString(",") + ") stored as parquetfile location" + " '" + Hive_Path + "'"
+      //val input5 = "create external table if not exists " + tblname + "(" + input4.collect().toList.mkString(",") + ") stored as parquetfile Location "+"+ Hive_Path +"
+      print(input5)
       //Table created in hive default database
 
       spark.sql(input5)
@@ -106,18 +109,18 @@ object SparkDataApp {
       val log2 = ("Completed", completedTime)
       LogList = log2.toString().replace("(", "").replace(")", "") :: LogList
 
-    } catch {
+    /*} catch {
       case e: Throwable =>
         println("File Not Found")
         val failedTime = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss").format(LocalDateTime.now)
         Exitcode = 1
         val log3 = ("failed", failedTime)
         LogList = log3.toString().replace("(", "").replace(")", "") :: LogList
-    } finally {
+    } finally {*/
       //spark.sparkContext.parallelize(LogList).saveAsTextFile("/Users/cklekkala/IdeaProjects/untitled1/injecti.log")
       //   spark.sparkContext.parallelize(LogList).coalesce(1,false).saveAsTextFile(args(0)+"/SimpleApp.log")
 
-    }
+ //   }
     spark.stop()
   }
 }
